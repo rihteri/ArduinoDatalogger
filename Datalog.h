@@ -13,7 +13,7 @@ class Datalog
     public:
         /// Construct a new datalogger for one data type, optionally defining
         /// the desired amount of history value storage
-        Datalog(int pin, int avgSize = 8);
+        Datalog(int pin, int avgSize = 32);
     
         ~Datalog();
     
