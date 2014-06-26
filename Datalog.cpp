@@ -1,97 +1,68 @@
 #include "Arduino.h"
 #include "Datalog.h"
 
-Datalog::Datalog(int pin, int avgSize)
-    : _pin(pin),
-      _curVal(-1),
-      _valSize(avgSize),
-      _inited(false),
-      _positiveOutlierCount(0),
-      _negativeOutlierCount(0),
-      _moving(false)
+Datalog::Datalog(int pin, int avgSize) :
+    _pin(pin),
+    _moving(false),
+    _avgSize(avgSize)
 {
-    _values = new int[avgSize];
+    _outlierSize = avgSize/OUTLIER_RATIO;
+    if (_outlierSize < 2)
+    {
+        _outlierSize = 2;
+    }
+
+    _values = new SmartArray(avgSize);
+    _outliers = new SmartArray(_outlierSize);
 }
 
 Datalog::~Datalog()
 {
     delete _values;
     _values = NULL;
+
+    delete _outliers;
+    _outliers = NULL;
 }
 
 void Datalog::update()
 {
     int val = analogRead(_pin);
 
-    double avg = getValue();
+    double stdDev = _values->getStdDev();
+    double deviation = abs(val - _values->getAvg());
 
-    double stdDev = getStdDev();
-    
-    double deviation = val - avg;
-
-    if (abs(deviation) < stdDev * 1.5
-        || !_inited
-        || _positiveOutlierCount > _valSize/4
-        || _negativeOutlierCount > _valSize/4
-        // detect if the value is moving to consistent direction
-        || (_moving = (
-            (deviation > 0
-                && _positiveOutlierCount > _negativeOutlierCount * 2
-                && _positiveOutlierCount > _valSize/8)
-            || (deviation < 0
-                && _negativeOutlierCount > _positiveOutlierCount * 2
-                && _negativeOutlierCount > _valSize/8))))
+    if (deviation > stdDev * ALLOWED_DEVIATION
+        && _values->isFull())
     {
-        // mark down outlier count for movement detection
-        int outliers = 0;
-        if (_negativeOutlierCount > _positiveOutlierCount)
-        {
-            outliers = _negativeOutlierCount - _positiveOutlierCount;
-        }
-        else
-        {
-            outliers = _positiveOutlierCount - _negativeOutlierCount;
-        }
+        // questionable value
+        _outliers->pushValue(val);
 
-        // update value
-        setValue(val);
-
-        if (_moving && _inited)
+        if (_outliers->isFull())
         {
-            // set previous values to avg to enable faster response
-            int* newNormal = new int[outliers];
-            for (int i = 0; i < outliers; i++)
+            if (_outliers->getStdDev() < stdDev)
             {
-                int index = _curVal - i;
+                // new normal
+                delete _values;
+                _values = new SmartArray(_avgSize, _outliers);
 
-                if (index < 0) index = _valSize - i - _curVal;
+                delete _outliers;
+                _outliers = new SmartArray(_outlierSize);
 
-                newNormal[i] = _values[index];
+                _moving = true;
             }
-            int newNormalAvg = getAvg(newNormal, outliers);
-            delete newNormal;
-
-            for (int i = 0; i < outliers; i++)
+            else
             {
-                int index = _curVal - i - outliers;
-
-                if (index < 0) index = _valSize - i - _curVal - outliers;
-
-                _values[index] = newNormalAvg;
+                // keep us from reaching 0 stdDev
+                _values->pushValue(_outliers->getAvg());
             }
         }
     }
     else
     {
-        // value discarded
-        if (deviation > 0)
-        {
-            _positiveOutlierCount++;
-        }
-        else
-        {
-            _negativeOutlierCount++;
-        }
+        // update value
+        _values->pushValue(val);
+        _moving = false;
     }
 }
 
@@ -100,78 +71,9 @@ boolean Datalog::isMoving()
     return _moving;
 }
 
-void Datalog::setValue(int value)
-{
-    _curVal++;
-
-    if (_curVal == _valSize) 
-    {
-        _curVal = 0;
-        _inited = true;
-    }
-
-    _values[_curVal] = value;
-    
-    _positiveOutlierCount = 0;
-    _negativeOutlierCount = 0;
-}
-
 double Datalog::getValue()
 {
-    return getAvg(_values, getValueCount());
+    return _values->getAvg();
 }
 
-int Datalog::getValueCount()
-{
-    int upperLimit = _valSize;
-    
-    if (!_inited) upperLimit = _curVal + 1;
-    
-    return upperLimit;
-}
 
-double Datalog::getAvg(double values[], int count)
-{
-    double sum = 0;
-    for (int i = 0; i < count; i++)
-    {
-        sum += values[i];
-    }
-    
-    if (count == 0) return 0;
-
-    return sum / count;
-}
-
-double Datalog::getAvg(int values[], int count)
-{
-    double sum = 0;
-    for (int i = 0; i < count; i++)
-    {
-        sum += values[i];
-    }
-
-    if (count == 0) return 0;
-
-    return sum / count;
-}
-
-double Datalog::getStdDev()
-{
-    int upperLimit = getValueCount();
-    double avg = getAvg(_values, upperLimit);
-
-    double* devs = new double[upperLimit];
-
-    for (int i = 0; i < upperLimit; i++)
-    {
-        double dev = _values[i] - avg;
-        devs[i] = dev * dev;
-    }
-
-    double stdDev = sqrt(getAvg(devs, upperLimit));
-
-    delete devs;
-
-    return stdDev;
-}

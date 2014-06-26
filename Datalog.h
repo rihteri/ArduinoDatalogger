@@ -8,6 +8,14 @@
 
 #include "Arduino.h"
 
+#include "SmartArray.h"
+
+struct MinMaxVal
+{
+    double min;
+    double max;
+};
+
 class Datalog
 {
     public:
@@ -19,49 +27,32 @@ class Datalog
     
         /// Read the latest value
         void update();
-    
-        /// Get a smoothed out value
-        double getValue();
 
-        /// Returns the standard deviation of the last measurements
-        double getStdDev();
-
+        /// returns true if fast-change detection was activated at the
+        /// last update().
         boolean isMoving();
+
+        double getValue();
     private:
-        /// Get the number of valid values in the array
-        int getValueCount();
-
-        /// Get average of an array
-        double getAvg(double values[], int count);
-
-        /// Get average of an array
-        double getAvg(int values[], int count);
-
-        /// Write a value to the array
-        void setValue(int value);
-
-        /// The latest measurements for averaging
-        int* _values;
-
-        /// Index of last value;
-        int _curVal;
-
-        /// Number of last values to store
-        int _valSize;
+        /// The minimum and maximum values of this session
+        MinMaxVal _sessionExtremes;
 
         /// Pin to read
         int _pin;
 
-        /// true after at least _valSize values have been read
-        boolean _inited;
+        SmartArray* _values;
+        SmartArray* _outliers;
 
-        int _positiveOutlierCount;
-        int _negativeOutlierCount;
+        int _outlierSize;
+        int _avgSize;
 
         /// true, if values are currently changing fast
         boolean _moving;
+
+        static const int OUTLIER_RATIO = 4;
+        static const double ALLOWED_DEVIATION = 1.5;
 };
 
 
 
-#endif Datalog_h
+#endif //Datalog_h
