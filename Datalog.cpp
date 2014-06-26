@@ -1,19 +1,19 @@
 #include "Arduino.h"
 #include "Datalog.h"
 
-Datalog::Datalog(int pin, int avgSize) :
+Datalog::Datalog(int pin, int valuesCount) :
     _pin(pin),
     _moving(false),
-    _avgSize(avgSize),
+    _avgSize(valuesCount),
     _extremesInited(false)
 {
-    _outlierSize = avgSize/OUTLIER_RATIO;
+    _outlierSize = _avgSize/OUTLIER_RATIO;
     if (_outlierSize < 2)
     {
         _outlierSize = 2;
     }
 
-    _values = new SmartArray(avgSize);
+    _values = new SmartArray(_avgSize);
     _outliers = new SmartArray(_outlierSize);
 }
 
