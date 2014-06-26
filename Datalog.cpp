@@ -4,7 +4,8 @@
 Datalog::Datalog(int pin, int avgSize) :
     _pin(pin),
     _moving(false),
-    _avgSize(avgSize)
+    _avgSize(avgSize),
+    _extremesInited(false)
 {
     _outlierSize = avgSize/OUTLIER_RATIO;
     if (_outlierSize < 2)
@@ -30,7 +31,13 @@ void Datalog::update()
     int val = analogRead(_pin);
 
     double stdDev = _values->getStdDev();
-    double deviation = abs(val - _values->getAvg());
+    double avg = _values->getAvg();
+    double deviation = abs(val - avg);
+
+    if (_values->isFull())
+    {
+        updateAggregates(avg);
+    }
 
     if (deviation > stdDev * ALLOWED_DEVIATION
         && _values->isFull())
@@ -63,6 +70,43 @@ void Datalog::update()
         // update value
         _values->pushValue(val);
         _moving = false;
+    }
+}
+
+MinMaxVal Datalog::getExtremes()
+{
+    if (!_extremesInited)
+    {
+        double current = getValue();
+        MinMaxVal ret;
+        ret.min = current;
+        ret.max = current;
+        return ret;
+    }
+    else
+    {
+        return _sessionExtremes;
+    }
+}
+
+void Datalog::updateAggregates(double value)
+{
+    if (!_extremesInited)
+    {
+        _sessionExtremes.max = value;
+        _sessionExtremes.min = value;
+        _extremesInited = true;
+    }
+    else
+    {
+        if (value > _sessionExtremes.max)
+        {
+            _sessionExtremes.max = value;
+        }
+        else if (value < _sessionExtremes.min)
+        {
+            _sessionExtremes.min = value;
+        }
     }
 }
 

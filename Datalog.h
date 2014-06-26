@@ -33,9 +33,15 @@ class Datalog
         boolean isMoving();
 
         double getValue();
+
+        MinMaxVal getExtremes();
+
     private:
+        void updateAggregates(double currentValue);
+
         /// The minimum and maximum values of this session
         MinMaxVal _sessionExtremes;
+        bool _extremesInited;
 
         /// Pin to read
         int _pin;
