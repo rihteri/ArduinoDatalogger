@@ -38,6 +38,7 @@ class Datalog
 
     private:
         void updateAggregates(double currentValue);
+        int getOutlierSize();
 
         /// The minimum and maximum values of this session
         MinMaxVal _sessionExtremes;
@@ -49,7 +50,6 @@ class Datalog
         SmartArray* _values;
         SmartArray* _outliers;
 
-        int _outlierSize;
         const int _avgSize;
 
         /// true, if values are currently changing fast

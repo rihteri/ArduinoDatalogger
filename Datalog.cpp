@@ -7,14 +7,8 @@ Datalog::Datalog(char pin, int valuesCount) :
     _avgSize(valuesCount),
     _extremesInited(false)
 {
-    _outlierSize = _avgSize/OUTLIER_RATIO;
-    if (_outlierSize < 2)
-    {
-        _outlierSize = 2;
-    }
-
     _values = new SmartArray(_avgSize);
-    _outliers = new SmartArray(_outlierSize);
+    _outliers = new SmartArray(getOutlierSize());
 }
 
 Datalog::~Datalog()
@@ -24,6 +18,17 @@ Datalog::~Datalog()
 
     delete _outliers;
     _outliers = NULL;
+}
+
+int Datalog::getOutlierSize()
+{
+    int outlierSize = _avgSize/OUTLIER_RATIO;
+    if (outlierSize < 2)
+    {
+        outlierSize = 2;
+    }
+
+    return outlierSize;
 }
 
 void Datalog::update(double scale)
@@ -54,7 +59,7 @@ void Datalog::update(double scale)
                 _values = new SmartArray(_avgSize, _outliers);
 
                 delete _outliers;
-                _outliers = new SmartArray(_outlierSize);
+                _outliers = new SmartArray(getOutlierSize());
 
                 _moving = true;
             }
