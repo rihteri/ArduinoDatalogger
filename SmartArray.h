@@ -29,7 +29,7 @@ class SmartArray
 
     private:
         /// Get average of an array
-        double getAvg(double values[], int count);
+        static double getAvg(double values[], int count);
 
         int getValue(int i);
 
