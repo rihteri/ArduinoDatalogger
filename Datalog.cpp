@@ -2,8 +2,7 @@
 
 #include "Datalog.h"
 
-Datalog::Datalog(char pin, int valuesCount, int eeprom_addr) :
-    _pin(pin),
+Datalog::Datalog(int valuesCount, int eeprom_addr) :
     _moving(false),
     _avgSize(valuesCount),
     _extremesInited(false),
@@ -50,10 +49,8 @@ int Datalog::getOutlierSize()
     return outlierSize;
 }
 
-void Datalog::update(double scale)
+void Datalog::update(double val)
 {
-    int val = analogRead(_pin)*scale;
-
     double stdDev = _values->getStdDev();
     double avg = _values->getAvg();
     double deviation = abs(val - avg);
@@ -115,11 +112,6 @@ MinMaxVal Datalog::getExtremes()
 
 void Datalog::updateAggregates(double value)
 {
-    Serial.print("min: ");
-    Serial.println(_sessionExtremes.min);
-    Serial.print("max: ");
-    Serial.println(_sessionExtremes.max);
-
     if (!_extremesInited)
     {
         _sessionExtremes.max = value;
@@ -134,7 +126,6 @@ void Datalog::updateAggregates(double value)
 
             _rom.seek(sizeof(value));
             _rom.write(value);
-            Serial.println("WRITE MAX");
         }
         else if (value < _sessionExtremes.min)
         {
@@ -142,8 +133,6 @@ void Datalog::updateAggregates(double value)
 
             _rom.seek(0);
             _rom.write(value);
-
-            Serial.println("WRITE MIN");
         }
     }
 }

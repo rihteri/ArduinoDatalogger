@@ -22,12 +22,12 @@ class Datalog
     public:
         /// Construct a new datalogger for one data type, optionally defining
         /// the desired amount of history value storage
-        Datalog(char pin, int valuesCount = 32, int eeprom_addr = -1);
+        Datalog(int valuesCount = 32, int eeprom_addr = -1);
     
         ~Datalog();
     
-        /// Read the latest value
-        void update(double scale = 5.0);
+        /// set the latest value
+        void update(double value);
 
         /// returns true if fast-change detection was activated at the
         /// last update().
@@ -46,9 +46,6 @@ class Datalog
         /// The minimum and maximum values of this session
         MinMaxVal _sessionExtremes;
         bool _extremesInited;
-
-        /// Pin to read
-        const char _pin;
 
         SmartArray* _values;
         SmartArray* _outliers;
