@@ -1,3 +1,5 @@
+#include "Arduino.h"
+
 #include "SmartArray.h"
 
 SmartArray::SmartArray(int size) :

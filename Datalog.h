@@ -9,6 +9,7 @@
 #include "Arduino.h"
 
 #include "SmartArray.h"
+#include "EEPROMStream.h"
 
 struct MinMaxVal
 {
@@ -21,7 +22,7 @@ class Datalog
     public:
         /// Construct a new datalogger for one data type, optionally defining
         /// the desired amount of history value storage
-        Datalog(char pin, int valuesCount = 32);
+        Datalog(char pin, int valuesCount = 32, int eeprom_addr = -1);
     
         ~Datalog();
     
@@ -35,6 +36,8 @@ class Datalog
         double getValue();
 
         MinMaxVal getExtremes();
+
+        void resetExtremes();
 
     private:
         void updateAggregates(double currentValue);
@@ -51,6 +54,7 @@ class Datalog
         SmartArray* _outliers;
 
         const int _avgSize;
+        EEPROMStream _rom;
 
         /// true, if values are currently changing fast
         boolean _moving;

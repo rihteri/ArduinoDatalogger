@@ -1,14 +1,33 @@
-#include "Arduino.h"
+#include <EEPROM.h>
+
 #include "Datalog.h"
 
-Datalog::Datalog(char pin, int valuesCount) :
+Datalog::Datalog(char pin, int valuesCount, int eeprom_addr) :
     _pin(pin),
     _moving(false),
     _avgSize(valuesCount),
-    _extremesInited(false)
+    _extremesInited(false),
+    _rom(eeprom_addr)
 {
     _values = new SmartArray(_avgSize);
     _outliers = new SmartArray(getOutlierSize());
+
+    if (eeprom_addr != -1)
+    {
+        _sessionExtremes.min = _rom.readDouble();
+        _sessionExtremes.max = _rom.readDouble();
+
+        if (_sessionExtremes.min > _sessionExtremes.max
+           || isnan(_sessionExtremes.min)
+           || isnan(_sessionExtremes.max))
+        {
+            _extremesInited = false;
+        }
+        else
+        {
+            _extremesInited = true;
+        }
+    }
 }
 
 Datalog::~Datalog()
@@ -96,6 +115,11 @@ MinMaxVal Datalog::getExtremes()
 
 void Datalog::updateAggregates(double value)
 {
+    Serial.print("min: ");
+    Serial.println(_sessionExtremes.min);
+    Serial.print("max: ");
+    Serial.println(_sessionExtremes.max);
+
     if (!_extremesInited)
     {
         _sessionExtremes.max = value;
@@ -107,11 +131,34 @@ void Datalog::updateAggregates(double value)
         if (value > _sessionExtremes.max)
         {
             _sessionExtremes.max = value;
+
+            _rom.seek(sizeof(value));
+            _rom.write(value);
+            Serial.println("WRITE MAX");
         }
         else if (value < _sessionExtremes.min)
         {
             _sessionExtremes.min = value;
+
+            _rom.seek(0);
+            _rom.write(value);
+
+            Serial.println("WRITE MIN");
         }
+    }
+}
+
+void Datalog::resetExtremes()
+{
+    _extremesInited = false;
+    _rom.seek(0);
+
+    for (int i = 0;
+         i < (sizeof(_sessionExtremes.min)
+              + sizeof(_sessionExtremes.max));
+         i++)
+    {
+        _rom.write((byte)255);
     }
 }
 

@@ -1,12 +1,8 @@
-/*
-    Smart array, for storing multiple values in a
-    variable size array
-*/
+// Smart array, for storing multiple values in a
+// variable size array
 
 #ifndef SmartArray_h
 #define SmartArray_h
-
-#include "Arduino.h"
 
 class SmartArray
 {
