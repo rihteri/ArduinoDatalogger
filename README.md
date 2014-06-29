@@ -5,8 +5,8 @@ This is a simple library for reading noisy analog inputs in Arduino.
 #### Datalog(int pin, int valuesCount = 32)
 Initialize a datalogger class on selected pin, with the designated amount of storage.
 
-#### void Datalog.update()
-Read value from pin.
+#### void Datalog.update(double scale=5.0)
+Read value from pin. You can define an optional multiplier for this value, for example if you want to read you Vcc and scale the values accordingly on each read.
 
 #### double Datalog.getValue()
 Get current (smooth) value.

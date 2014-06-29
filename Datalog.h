@@ -26,7 +26,7 @@ class Datalog
         ~Datalog();
     
         /// Read the latest value
-        void update();
+        void update(double scale = 5.0);
 
         /// returns true if fast-change detection was activated at the
         /// last update().

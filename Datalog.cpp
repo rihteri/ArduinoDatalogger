@@ -26,9 +26,9 @@ Datalog::~Datalog()
     _outliers = NULL;
 }
 
-void Datalog::update()
+void Datalog::update(double scale)
 {
-    int val = analogRead(_pin);
+    int val = analogRead(_pin)*scale;
 
     double stdDev = _values->getStdDev();
     double avg = _values->getAvg();

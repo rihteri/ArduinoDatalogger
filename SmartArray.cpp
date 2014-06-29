@@ -5,7 +5,7 @@ SmartArray::SmartArray(int size) :
     _isFull(false),
     _currentIndex(-1)
 {
-    _values = new int[_size];
+    _values = new double[_size];
 }
 
 SmartArray::SmartArray(int size, SmartArray* initial_data) :
@@ -13,7 +13,7 @@ SmartArray::SmartArray(int size, SmartArray* initial_data) :
     _isFull(false),
     _currentIndex(-1)
 {
-    _values = new int[_size];
+    _values = new double[_size];
 
     int until = initial_data->getValueCount();
 
@@ -51,7 +51,7 @@ boolean SmartArray::isFull()
     return _isFull;
 }
 
-void SmartArray::pushValue(int value)
+void SmartArray::pushValue(double value)
 {
     _currentIndex++;
 
@@ -89,15 +89,7 @@ double SmartArray::getAvg(double values[], int count)
 double SmartArray::getAvg()
 {
     int count = getValueCount();
-    double sum = 0;
-    for (int i = 0; i < count; i++)
-    {
-        sum += _values[i];
-    }
-
-    if (count == 0) return 0;
-
-    return sum / count;
+    return getAvg(_values, count);
 }
 
 double SmartArray::getStdDev()

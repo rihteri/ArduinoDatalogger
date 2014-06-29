@@ -16,7 +16,7 @@ class SmartArray
 
         ~SmartArray();
 
-        void pushValue(int value);
+        void pushValue(double value);
 
         double getAvg();
 
@@ -33,7 +33,7 @@ class SmartArray
 
         int getValue(int i);
 
-        int* _values;
+        double* _values;
         int _currentIndex;
         bool _isFull;
         int _size;
