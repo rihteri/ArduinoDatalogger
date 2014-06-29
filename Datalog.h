@@ -21,7 +21,7 @@ class Datalog
     public:
         /// Construct a new datalogger for one data type, optionally defining
         /// the desired amount of history value storage
-        Datalog(int pin, int valuesCount = 32);
+        Datalog(char pin, int valuesCount = 32);
     
         ~Datalog();
     
@@ -44,13 +44,13 @@ class Datalog
         bool _extremesInited;
 
         /// Pin to read
-        int _pin;
+        const char _pin;
 
         SmartArray* _values;
         SmartArray* _outliers;
 
         int _outlierSize;
-        int _avgSize;
+        const int _avgSize;
 
         /// true, if values are currently changing fast
         boolean _moving;

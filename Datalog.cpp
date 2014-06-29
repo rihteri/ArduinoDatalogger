@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "Datalog.h"
 
-Datalog::Datalog(int pin, int valuesCount) :
+Datalog::Datalog(char pin, int valuesCount) :
     _pin(pin),
     _moving(false),
     _avgSize(valuesCount),
