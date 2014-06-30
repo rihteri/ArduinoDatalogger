@@ -51,7 +51,6 @@ void loop() {
   temperature.update(temp);
 
   // get the smoothed value
-  // note that we get double from analog inputs!
   double val = temperature.getValue(); 
   
   Serial.print(temp);
