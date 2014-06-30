@@ -20,6 +20,9 @@ class EEPROMStream
         double readDouble();
         void read(void* value, int size);
 
+        /// true, if the address was valid
+        boolean isValid();
+
     private:
         const int _addr;
         int _pos;

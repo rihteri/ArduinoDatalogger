@@ -12,6 +12,11 @@ void EEPROMStream::seek(int position)
     _pos = position;
 }
 
+boolean EEPROMStream::isValid()
+{
+    return _addr >= 0;
+}
+
 // write
 ////////
 
@@ -47,6 +52,8 @@ void EEPROMStream::write(double value, int precision)
 
 void EEPROMStream::write(void* data, int size)
 {
+    if (_addr < 0) return;
+
     byte* data_byte = (byte*)data;
 
     for (int i = 0; i < size; i++)
