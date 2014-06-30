@@ -24,6 +24,7 @@ class Button
         ButtonFunction* _functions;
         char _nfunctions;
         long _startMillis;
+        boolean _alreadyRun;
 };
 
 #endif // Button_h

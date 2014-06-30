@@ -3,7 +3,8 @@
 Button::Button() :
     _functions(NULL),
     _startMillis(-1),
-    _nfunctions(0)
+    _nfunctions(0),
+    _alreadyRun(false)
 { }
 
 Button::~Button()
@@ -51,11 +52,19 @@ void Button::update(char value)
         if (_startMillis < 0)
         {
             _startMillis = millis();
+            _alreadyRun = false;
+        }
+        else if (_functions[_nfunctions-1].delay < millis() - _startMillis
+                && !_alreadyRun)
+        {
+            // last press timeout reached
+            _functions[_nfunctions-1].callback();
+            _alreadyRun = true;
         }
     }
     else if (value == LOW)
     {
-        if (_startMillis >= 0)
+        if (_startMillis >= 0 && !_alreadyRun)
         {
             long millisNow = millis();
 
