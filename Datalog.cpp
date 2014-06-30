@@ -5,7 +5,7 @@
 Datalog::Datalog(int valuesCount, int eeprom_addr) :
     _moving(false),
     _avgSize(valuesCount),
-    _extremesInited(false),
+    _aggrInited(false),
     _rom(eeprom_addr)
 {
     _values = new SmartArray(_avgSize);
@@ -13,18 +13,20 @@ Datalog::Datalog(int valuesCount, int eeprom_addr) :
 
     if (eeprom_addr != -1)
     {
-        _sessionExtremes.min = _rom.readDouble();
-        _sessionExtremes.max = _rom.readDouble();
+        _aggr.minTime = 0;
+        _aggr.maxTime = 0;
+        _aggr.min = _rom.readDouble();
+        _aggr.max = _rom.readDouble();
 
-        if (_sessionExtremes.min > _sessionExtremes.max
-           || isnan(_sessionExtremes.min)
-           || isnan(_sessionExtremes.max))
+        if (_aggr.min > _aggr.max
+           || isnan(_aggr.min)
+           || isnan(_aggr.max))
         {
-            _extremesInited = false;
+            _aggrInited = false;
         }
         else
         {
-            _extremesInited = true;
+            _aggrInited = true;
         }
     }
 }
@@ -94,60 +96,98 @@ void Datalog::update(double val)
     }
 }
 
-MinMaxVal Datalog::getExtremes()
+Aggregate Datalog::getAggregates()
 {
-    if (!_extremesInited)
+    if (!_aggrInited)
     {
         double current = getValue();
-        MinMaxVal ret;
+        Aggregate ret;
         ret.min = current;
         ret.max = current;
+        ret.avg = current;
+        ret.sample_count = 0;
+
+        long timeNow = millis();
+        ret.minTime = timeNow;
+        ret.maxTime = timeNow;
+
         return ret;
     }
     else
     {
-        return _sessionExtremes;
+        return _aggr;
     }
 }
 
 void Datalog::updateAggregates(double value)
 {
-    if (!_extremesInited)
+    if (!_aggrInited)
     {
-        _sessionExtremes.max = value;
-        _sessionExtremes.min = value;
-        _extremesInited = true;
+        _aggr.max = value;
+        _aggr.min = value;
+        _aggr.sample_count = 1;
+        _aggr.avg = value;
 
-        _rom.write((void*)&_sessionExtremes, sizeof(_sessionExtremes));
+        long timeNow = millis();
+        _aggr.minTime = timeNow;
+        _aggr.maxTime = timeNow;
+
+        _aggrInited = true;
+
+        if (_rom.isValid())
+        {
+            _rom.write(
+                (void*)&_aggr,
+                sizeof(_aggr));
+        }
     }
     else
     {
-        if (value > _sessionExtremes.max)
+        if (value > _aggr.max)
         {
-            _sessionExtremes.max = value;
+            _aggr.max = value;
+            _aggr.maxTime = millis();
 
-            _rom.seek(sizeof(value));
-            _rom.write(value, EXTREME_PRECISION);
+            if (_rom.isValid())
+            {
+                _rom.seek(sizeof(value));
+                _rom.write(value, EXTREME_PRECISION);
+            }
         }
-        else if (value < _sessionExtremes.min)
+        else if (value < _aggr.min)
         {
-            _sessionExtremes.min = value;
+            _aggr.min = value;
+            _aggr.minTime = millis();
 
-            _rom.seek(0);
-            _rom.write(value, EXTREME_PRECISION);
+            if (_rom.isValid())
+            {
+                _rom.seek(0);
+                _rom.write(value, EXTREME_PRECISION);
+            }
+        }
+
+        if (_values->isLooping())
+        {
+            _aggr.avg
+                = (_aggr.avg * _aggr.sample_count + value)
+                    / ++_aggr.sample_count;
         }
     }
 }
 
-void Datalog::resetExtremes()
+void Datalog::resetAggregates()
 {
-    _extremesInited = false;
-    _rom.seek(0);
+    _aggrInited = false;
 }
 
 boolean Datalog::isMoving()
 {
     return _moving;
+}
+
+boolean Datalog::isValid()
+{
+    return _values->isFull() && !_moving;
 }
 
 double Datalog::getValue()

@@ -23,6 +23,9 @@ class SmartArray
         /// Get the number of valid values in the array
         int getValueCount();
 
+        /// true, if this is the value that completes a full cirle
+        boolean isLooping();
+
     private:
         /// Get average of an array
         static double getAvg(double values[], int count);

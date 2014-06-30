@@ -36,6 +36,11 @@ SmartArray::~SmartArray()
     delete _values;
 }
 
+boolean SmartArray::isLooping()
+{
+    return _currentIndex == 0 && isFull();
+}
+
 int SmartArray::getValue(int i)
 {
     int index = _currentIndex - i;

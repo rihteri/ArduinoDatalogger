@@ -10,12 +10,7 @@
 
 #include "SmartArray.h"
 #include "EEPROMStream.h"
-
-struct MinMaxVal
-{
-    double min;
-    double max;
-};
+#include "Aggregate.h"
 
 class Datalog
 {
@@ -35,17 +30,19 @@ class Datalog
 
         double getValue();
 
-        MinMaxVal getExtremes();
+        Aggregate getAggregates();
 
-        void resetExtremes();
+        void resetAggregates();
+
+        boolean isValid();
 
     private:
         void updateAggregates(double currentValue);
         int getOutlierSize();
 
         /// The minimum and maximum values of this session
-        MinMaxVal _sessionExtremes;
-        bool _extremesInited;
+        Aggregate _aggr;
+        bool _aggrInited;
 
         SmartArray* _values;
         SmartArray* _outliers;
