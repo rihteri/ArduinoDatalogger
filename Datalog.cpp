@@ -125,14 +125,14 @@ void Datalog::updateAggregates(double value)
             _sessionExtremes.max = value;
 
             _rom.seek(sizeof(value));
-            _rom.write(value);
+            _rom.write(value, EXTREME_PRECISION);
         }
         else if (value < _sessionExtremes.min)
         {
             _sessionExtremes.min = value;
 
             _rom.seek(0);
-            _rom.write(value);
+            _rom.write(value, EXTREME_PRECISION);
         }
     }
 }

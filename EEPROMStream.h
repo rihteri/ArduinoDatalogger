@@ -12,7 +12,7 @@ class EEPROMStream
 
         void write(int value);
         void write(char value);
-        void write(double value);
+        void write(double value, int precision = -1);
         void write(void* data, int size);
 
         int readInt();

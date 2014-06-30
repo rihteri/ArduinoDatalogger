@@ -58,6 +58,7 @@ class Datalog
 
         static const int OUTLIER_RATIO = 4;
         static const double ALLOWED_DEVIATION = 1.5;
+        static const int EXTREME_PRECISION = 1;
 };
 
 

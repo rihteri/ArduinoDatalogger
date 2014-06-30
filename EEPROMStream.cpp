@@ -25,8 +25,23 @@ void EEPROMStream::write(char value)
     write((void*)&value, sizeof(value));
 }
 
-void EEPROMStream::write(double value)
+void EEPROMStream::write(double value, int precision)
 {
+    if (precision >= 0)
+    {
+        for (int i = 0; i < precision; i++)
+        {
+            value = value * 10;
+        }
+
+        value = round(value);
+
+        for (int i = 0; i < precision; i++)
+        {
+            value = value / 10;
+        }
+    }
+
     write((void*)&value, sizeof(value));
 }
 
