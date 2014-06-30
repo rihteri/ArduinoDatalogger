@@ -117,6 +117,8 @@ void Datalog::updateAggregates(double value)
         _sessionExtremes.max = value;
         _sessionExtremes.min = value;
         _extremesInited = true;
+
+        _rom.write((void*)&_sessionExtremes, sizeof(_sessionExtremes));
     }
     else
     {
@@ -141,14 +143,6 @@ void Datalog::resetExtremes()
 {
     _extremesInited = false;
     _rom.seek(0);
-
-    for (int i = 0;
-         i < (sizeof(_sessionExtremes.min)
-              + sizeof(_sessionExtremes.max));
-         i++)
-    {
-        _rom.write((byte)255);
-    }
 }
 
 boolean Datalog::isMoving()
