@@ -26,6 +26,8 @@ class SmartArray
         /// true, if this is the value that completes a full cirle
         boolean isLooping();
 
+        void clear();
+
     private:
         /// Get average of an array
         static double getAvg(double values[], int count);
@@ -35,7 +37,7 @@ class SmartArray
         double* _values;
         int _currentIndex;
         bool _isFull;
-        int _size;
+        const int _size;
 };
 
 #endif //SmartArray_h

@@ -118,3 +118,9 @@ double SmartArray::getStdDev()
 
     return stdDev;
 }
+
+void SmartArray::clear()
+{
+    _isFull = false;
+    _currentIndex = 0;
+}

@@ -209,4 +209,7 @@ double Datalog::getValue()
     return _values->getAvg();
 }
 
-
+void Datalog::reset()
+{
+    _values->clear();
+}

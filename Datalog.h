@@ -45,6 +45,9 @@ class Datalog
 
         boolean isValid();
 
+        /// remove values counting for current average
+        void reset();
+
     private:
         void updateAggregates(double currentValue);
         int getOutlierSize();
