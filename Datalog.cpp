@@ -2,15 +2,22 @@
 
 #include "Datalog.h"
 
-Datalog::Datalog(int valuesCount, int eeprom_addr) :
+Datalog::Datalog(int valuesCount
+#ifdef DATALOG_USE_EEPROM
+                 , int eeprom_addr
+#endif
+                ) :
     _moving(false),
     _avgSize(valuesCount),
-    _aggrInited(false),
-    _rom(eeprom_addr)
+    _aggrInited(false)
+#ifdef DATALOG_USE_EEPROM
+    , _rom(eeprom_addr)
+#endif
 {
     _values = new SmartArray(_avgSize);
     _outliers = new SmartArray(getOutlierSize());
 
+#ifdef DATALOG_USE_EEPROM
     if (eeprom_addr != -1)
     {
         _aggr.minTime = 0;
@@ -29,6 +36,7 @@ Datalog::Datalog(int valuesCount, int eeprom_addr) :
             _aggrInited = true;
         }
     }
+#endif
 }
 
 Datalog::~Datalog()
@@ -134,12 +142,14 @@ void Datalog::updateAggregates(double value)
 
         _aggrInited = true;
 
+#ifdef DATALOG_USE_EEPROM
         if (_rom.isValid())
         {
             _rom.write(
                 (void*)&_aggr,
                 sizeof(_aggr));
         }
+#endif
     }
     else
     {
@@ -148,22 +158,26 @@ void Datalog::updateAggregates(double value)
             _aggr.max = value;
             _aggr.maxTime = millis();
 
+#ifdef DATALOG_USE_EEPROM
             if (_rom.isValid())
             {
                 _rom.seek(sizeof(value));
                 _rom.write(value, EXTREME_PRECISION);
             }
+#endif
         }
         else if (value < _aggr.min)
         {
             _aggr.min = value;
             _aggr.minTime = millis();
 
+#ifdef DATALOG_USE_EEPROM
             if (_rom.isValid())
             {
                 _rom.seek(0);
                 _rom.write(value, EXTREME_PRECISION);
             }
+#endif
         }
 
         if (_values->isLooping())

@@ -102,3 +102,7 @@ void loop()
 }
 ```
 
+
+### Settings
+
+The file `settings.h` includes #defines you can comment away to save some space by removing unnecessary code.
