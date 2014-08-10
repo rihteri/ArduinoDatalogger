@@ -25,6 +25,11 @@ void EEPROMStream::write(int value)
     write((void*)&value, sizeof(value));
 }
 
+void EEPROMStream::write(unsigned long value)
+{
+    write((void*)&value, sizeof(value));
+}
+
 void EEPROMStream::write(char value)
 {
     write((void*)&value, sizeof(value));
@@ -76,6 +81,16 @@ void EEPROMStream::write(void* data, int size)
 int EEPROMStream::readInt()
 {
     int ret = 0;
+
+    read((void*)&ret, sizeof(ret));
+
+    return ret;
+}
+
+
+unsigned long EEPROMStream::readULong()
+{
+    unsigned long ret = 0;
 
     read((void*)&ret, sizeof(ret));
 

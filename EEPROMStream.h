@@ -11,6 +11,7 @@ class EEPROMStream
         void seek(int position);
 
         void write(int value);
+        void write(unsigned long value);
         void write(char value);
         void write(double value, int precision = -1);
         void write(void* data, int size);
@@ -18,6 +19,7 @@ class EEPROMStream
         int readInt();
         char readByte();
         double readDouble();
+        unsigned long readULong();
         void read(void* value, int size);
 
         /// true, if the address was valid
