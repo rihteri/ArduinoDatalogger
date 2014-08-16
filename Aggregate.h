@@ -5,9 +5,9 @@
 
 struct Aggregate
 {
-    long minTime;
+    unsigned long minTime;
     double min;
-    long maxTime;
+    unsigned long maxTime;
     double max;
 
     double avg;

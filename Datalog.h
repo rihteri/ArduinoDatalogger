@@ -15,6 +15,10 @@
 #include "EEPROMStream.h"
 #endif
 
+#ifdef DATALOG_USE_TIME
+#include <Time.h>
+#endif
+
 #include "Aggregate.h"
 
 class Datalog
@@ -51,6 +55,7 @@ class Datalog
     private:
         void updateAggregates(double currentValue);
         int getOutlierSize();
+        unsigned long getNow();
 
         /// The minimum and maximum values of this session
         Aggregate _aggr;

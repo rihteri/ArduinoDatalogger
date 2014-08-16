@@ -1,5 +1,3 @@
-#include <EEPROM.h>
-
 #include "Datalog.h"
 
 Datalog::Datalog(int valuesCount
@@ -20,10 +18,11 @@ Datalog::Datalog(int valuesCount
 #ifdef DATALOG_USE_EEPROM
     if (eeprom_addr != -1)
     {
+        _rom.read((void*)&_aggr, sizeof(_aggr));
+#ifndef DATALOG_USE_TIME
         _aggr.minTime = 0;
         _aggr.maxTime = 0;
-        _aggr.min = _rom.readDouble();
-        _aggr.max = _rom.readDouble();
+#endif
 
         if (_aggr.min > _aggr.max
            || isnan(_aggr.min)
@@ -115,7 +114,7 @@ Aggregate Datalog::getAggregates()
         ret.avg = current;
         ret.sample_count = 0;
 
-        long timeNow = millis();
+        unsigned long timeNow = getNow();
         ret.minTime = timeNow;
         ret.maxTime = timeNow;
 
@@ -127,6 +126,15 @@ Aggregate Datalog::getAggregates()
     }
 }
 
+unsigned long Datalog::getNow()
+{
+#ifdef DATALOG_USE_TIME
+        return now();
+#else
+        return millis();
+#endif
+}
+
 void Datalog::updateAggregates(double value)
 {
     if (!_aggrInited)
@@ -136,7 +144,7 @@ void Datalog::updateAggregates(double value)
         _aggr.sample_count = 1;
         _aggr.avg = value;
 
-        long timeNow = millis();
+        long timeNow = getNow();
         _aggr.minTime = timeNow;
         _aggr.maxTime = timeNow;
 
@@ -156,26 +164,30 @@ void Datalog::updateAggregates(double value)
         if (value > _aggr.max)
         {
             _aggr.max = value;
-            _aggr.maxTime = millis();
+            _aggr.maxTime = getNow();
 
 #ifdef DATALOG_USE_EEPROM
             if (_rom.isValid())
             {
-                _rom.seek(sizeof(value));
-                _rom.write(value, EXTREME_PRECISION);
+                _rom.seek(0);
+                _rom.write(
+                    (void*)&_aggr,
+                    sizeof(_aggr));
             }
 #endif
         }
         else if (value < _aggr.min)
         {
             _aggr.min = value;
-            _aggr.minTime = millis();
+            _aggr.minTime = getNow();
 
 #ifdef DATALOG_USE_EEPROM
             if (_rom.isValid())
             {
                 _rom.seek(0);
-                _rom.write(value, EXTREME_PRECISION);
+                _rom.write(
+                    (void*)&_aggr,
+                    sizeof(_aggr));
             }
 #endif
         }
