@@ -47,7 +47,7 @@ void Button::attachFunction(void (*callback)(), int delay)
 
 void Button::update(char value)
 {
-    if (value == HIGH)
+    if (value > 0)
     {
         if (_startMillis < 0)
         {
@@ -62,7 +62,7 @@ void Button::update(char value)
             _alreadyRun = true;
         }
     }
-    else if (value == LOW)
+    else
     {
         if (_startMillis >= 0 && !_alreadyRun)
         {
